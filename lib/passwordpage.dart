@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'dbhelper.dart';
+import 'package:go_router/go_router.dart';
+import 'package:passwd/main.dart';
+import 'package:passwd/pages/auth/signup.dart';
+import 'package:passwd/pages/list_mfa_page.dart';
 
 class PasswordPage extends StatefulWidget {
+  static const route = '/';
+
+  const PasswordPage({super.key});
   @override
   _PasswordPageState createState() => _PasswordPageState();
 }
@@ -57,7 +64,7 @@ class _PasswordPageState extends State<PasswordPage> {
           contentPadding: EdgeInsets.symmetric(
             horizontal: 15.0,
           ),
-          title: Text("Добавить данные", style: titlestyle),
+          title: Text("Добавить данные", style: subtitlestyle, textAlign: TextAlign.center,),
           children: <Widget>[
             Form(
               key: formstate,
@@ -124,7 +131,7 @@ class _PasswordPageState extends State<PasswordPage> {
                       },
                       child: Text("Добавить", style: titlestyle),
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent),
+                          backgroundColor: Colors.teal),
                     ),
                   ),
                 ],
@@ -143,12 +150,30 @@ class _PasswordPageState extends State<PasswordPage> {
           "Сохраненные данные",
           style: titlestyle
         ),
+          actions: [
+          PopupMenuButton(
+          itemBuilder: (context) {
+          return [
+            PopupMenuItem(child: const Text('Отменить МФА'), onTap: () {
+              context.push(ListMFAPage.route);
+              },
+            ),
+            PopupMenuItem(child: const Text('Выйти'), onTap: () {
+              supabase.auth.signOut();
+              context.go(RegisterPage.route);
+              },
+            ),
+          ];
+          },
+          )
+          ],
         backgroundColor: Colors.indigo,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addpassword,
-        child: Icon(Icons.add),
-        backgroundColor: Colors.indigo,
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Colors.teal,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
       backgroundColor: dark,
       body: FutureBuilder(
@@ -213,7 +238,7 @@ class _PasswordPageState extends State<PasswordPage> {
             }
           } else if (snapshot.hasError) {
             return Center(
-              child: CircularProgressIndicator(),
+              child: Text(snapshot.error.toString()),
             );
           } else {
             return Center(
