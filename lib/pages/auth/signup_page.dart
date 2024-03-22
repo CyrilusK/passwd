@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
-import 'package:passwd/pages/auth/login_page.dart';
 import 'package:passwd/pages/mfa/enroll_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -60,12 +59,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 await supabase.auth.signUp(
                   email: email,
                   password: password,
-                  emailRedirectTo:
-                      'passwd://callback${MFAEnrollPage.route}', // redirect the user to setup MFA page after email confirmation
+                  //emailRedirectTo:
+                  //    'passwd://callback${MFAEnrollPage.route}', // redirect the user to setup MFA page after email confirmation
                 );
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Успешно зарегистрировано')));
+                  context.go(MFAEnrollPage.route);
                 }
               } on AuthException catch (error) {
                 ScaffoldMessenger.of(context)

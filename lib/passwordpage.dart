@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
 import 'package:passwd/pages/list_mfa_page.dart';
 import 'supabasehelper.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class PasswordPage extends StatefulWidget {
   static const route = '/';
@@ -49,14 +50,103 @@ class _PasswordPageState extends State<PasswordPage> {
   Future<void> queryall() async {
     try {
       allrows = await sphelper.getUserAccounts();
-      print('Получены данные из базы данных: $allrows');
+      print('[DEBUG] - Получены данные из базы данных: $allrows');
     } catch (error) {
-      print('Ошибка при получении данных из базы данных: $error');
+      print('[DEBUG] - Ошибка при получении данных из базы данных: $error');
     }
   }
 
+  void addPassword() {
+    showDialog(
+        context: context,
+        builder: (context) => SimpleDialog(
+              backgroundColor: Colors.indigo,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 15.0,
+              ),
+              title: Text(
+                "Добавить данные",
+                style: subtitlestyle,
+                textAlign: TextAlign.center,
+              ),
+              children: <Widget>[
+                Form(
+                  key: formstate,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: "Веб-сайт",
+                          labelStyle: subtitlestyle,
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                        ),
+                        style: titlestyle,
+                        validator: validateempty,
+                        onChanged: (_val) {
+                          type = _val;
+                        },
+                      ),
+                      TextFormField(
+                          decoration: InputDecoration(
+                            labelText: "Логин/е-мейл/номер",
+                            labelStyle: subtitlestyle,
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white)),
+                          ),
+                          style: titlestyle,
+                          validator: validateempty,
+                          onChanged: (_val) {
+                            login = _val;
+                          },
+                        ),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: "Пароль",
+                          labelStyle: subtitlestyle,
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white)),
+                        ),
+                        style: titlestyle,
+                        validator: validateempty,
+                        onChanged: (_val) {
+                          pass = _val;
+                        },
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (formstate.currentState!.validate()) {
+                              print("[DEBUG] - Ready To Enter Data");
+                              insertdata();
+                            }
+                          },
+                          child: Text("Добавить", style: titlestyle),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ));
+  }
 
-  void addpassword() {
+  void editPassword(Map<String, dynamic> data, int index) async {
+    var editedData = data;
+    var service = editedData['service_name'];
+    var nick = editedData['login'];
+    var password = editedData['login'];
     showDialog(
         context: context,
         builder: (context) => SimpleDialog(
@@ -64,7 +154,11 @@ class _PasswordPageState extends State<PasswordPage> {
           contentPadding: EdgeInsets.symmetric(
             horizontal: 15.0,
           ),
-          title: Text("Добавить данные", style: subtitlestyle, textAlign: TextAlign.center,),
+          title: Text(
+            "Редактировать данные",
+            style: subtitlestyle,
+            textAlign: TextAlign.center,
+          ),
           children: <Widget>[
             Form(
               key: formstate,
@@ -73,6 +167,7 @@ class _PasswordPageState extends State<PasswordPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   TextFormField(
+                    initialValue: data['service_name'],
                     decoration: InputDecoration(
                       labelText: "Веб-сайт",
                       labelStyle: subtitlestyle,
@@ -84,31 +179,14 @@ class _PasswordPageState extends State<PasswordPage> {
                     style: titlestyle,
                     validator: validateempty,
                     onChanged: (_val) {
-                      type = _val;
+                      service = _val;
                     },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 5, horizontal: 5),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: "Логин/е-мейл/номер",
-                        labelStyle: subtitlestyle,
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white)),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white)),
-                      ),
-                      style: titlestyle,
-                      validator: validateempty,
-                      onChanged: (_val) {
-                        login = _val;
-                      },
-                    ),
-                  ),
                   TextFormField(
+                    initialValue: data['login'],
                     decoration: InputDecoration(
-                      labelText: "Пароль",  labelStyle: subtitlestyle,
+                      labelText: "Логин/е-мейл/номер",
+                      labelStyle: subtitlestyle,
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white)),
                       focusedBorder: UnderlineInputBorder(
@@ -117,19 +195,41 @@ class _PasswordPageState extends State<PasswordPage> {
                     style: titlestyle,
                     validator: validateempty,
                     onChanged: (_val) {
-                      pass = _val;
+                      nick = _val;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: data['password'],
+                    decoration: InputDecoration(
+                      labelText: "Пароль",
+                      labelStyle: subtitlestyle,
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white)),
+                    ),
+                    style: titlestyle,
+                    validator: validateempty,
+                    onChanged: (_val) {
+                      password = _val;
                     },
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 15.0),
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (formstate.currentState!.validate()) {
-                          print("Ready To Enter Data");
-                          insertdata();
+                          print("[DEBUG] - Ready To Edit Data");
+                          sphelper.updateUserAccount(data['id'], service, nick, password);
+                          setState(() {
+                            allrows[index]['service_name'] = service;
+                            allrows[index]['login'] = nick;
+                            allrows[index]['password'] = password;
+                          });
+                          Navigator.pop(context);
                         }
                       },
-                      child: Text("Добавить", style: titlestyle),
+                      child: Text("Редактировать", style: titlestyle),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal),
                     ),
@@ -172,7 +272,7 @@ class _PasswordPageState extends State<PasswordPage> {
         backgroundColor: Colors.indigo,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: addpassword,
+        onPressed: addPassword,
         child: Icon(Icons.add, color: Colors.white),
         backgroundColor: Colors.teal,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -197,38 +297,78 @@ class _PasswordPageState extends State<PasswordPage> {
                   child: ListView.builder(
                     itemCount: allrows.length,
                     itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.only(
-                          top: 10.0,
+                      return Dismissible(
+                        key: UniqueKey(),
+                        background: Container(
+                          color: Colors.blue, // Цвет фона для удаления
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Icon(Icons.edit, color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: deeppurple,
-                          borderRadius: BorderRadius.circular(15.0),
+                        secondaryBackground: Container(
+                          color: Colors.red, // Цвет фона для редактирования
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Icon(Icons.delete, color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: Text(allrows[index]['service_name'],
-                                  textAlign: TextAlign.center,
-                                  style: titlestyle),
-                            ),
-                            ListTile(
-                              leading: Icon(
-                                Icons.facebook,
-                                size: 40.0,
-                                color: Colors.white,
+                        onDismissed: (direction) {
+                          if (direction == DismissDirection.endToStart) {
+                            // Обработка удаления
+                            final deletedItem = allrows.removeAt(index);
+                            // Вызов метода для удаления элемента из базы данных
+                            sphelper.deleteUserAccount(deletedItem['id']);
+                          } else if (direction == DismissDirection.startToEnd) {
+                            // Обработка редактирования
+                            print('[DEBUG] - ${allrows.elementAt(index)}');
+                            final tipe = allrows.elementAt(index);
+                            editPassword(allrows.elementAt(index), index);
+                          }
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            top: 10.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: deeppurple,
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5),
+                                child: Text(allrows[index]['service_name'],
+                                    textAlign: TextAlign.center,
+                                    style: titlestyle),
                               ),
-                              title: Text(
-                                allrows[index]['login'],
-                                style: titlestyle,
+                              ListTile(
+                                leading: Icon(
+                                  Icons.facebook,
+                                  size: 40.0,
+                                  color: Colors.white,
+                                ),
+                                title: Text(
+                                  allrows[index]['login'],
+                                  style: titlestyle,
+                                ),
+                                subtitle: Text(
+                                  allrows[index]['password'],
+                                  style: subtitlestyle,
+                                ),
                               ),
-                              subtitle: Text(
-                                allrows[index]['password'],
-                                style: subtitlestyle,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
