@@ -4,7 +4,6 @@ import 'package:supabase/supabase.dart';
 class SupabaseHelper {
   static final SupabaseHelper instance = SupabaseHelper._privateConstructor();
   static SupabaseClient? _client;
-  static String? _userId = supabase.auth.currentUser!.id;
 
   SupabaseHelper._privateConstructor();
 
@@ -12,7 +11,7 @@ class SupabaseHelper {
     final response = await supabase
         .from('user_accounts')
         .insert([
-      {'user_id': _userId, 'service_name': serviceName, 'login': login, 'password': password}
+      {'user_id': supabase.auth.currentUser!.id, 'service_name': serviceName, 'login': login, 'password': password}
     ]);
 
     if (response != null) {
@@ -23,8 +22,8 @@ class SupabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getUserAccounts() async {
-    final response = await supabase.from('user_accounts').select().eq('user_id', _userId!);
-    print(_userId);
+    final response = await supabase.from('user_accounts').select().eq('user_id', supabase.auth.currentUser!.id);
+    print('[DEBUG] - user: ${supabase.auth.currentUser!.id}');
     return response;
   }
 

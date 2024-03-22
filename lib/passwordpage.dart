@@ -1,10 +1,8 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:passwd/pages/auth/login_page.dart';
 import 'colors.dart';
-import 'dbhelper.dart';
 import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
-import 'package:passwd/pages/auth/signup.dart';
 import 'package:passwd/pages/list_mfa_page.dart';
 import 'supabasehelper.dart';
 
@@ -163,7 +161,8 @@ class _PasswordPageState extends State<PasswordPage> {
                   child: const Text('Выйти'),
                   onTap: () {
                     supabase.auth.signOut();
-                    context.go(RegisterPage.route);
+                    allrows = [];
+                    context.go(LoginPage.route);
                   },
                 ),
               ];

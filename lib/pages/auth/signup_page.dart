@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
-import 'package:passwd/pages/auth/signup_page.dart';
-import 'package:passwd/pages/mfa/verify_page.dart';
+import 'package:passwd/pages/auth/login_page.dart';
+import 'package:passwd/pages/mfa/enroll_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class LoginPage extends StatefulWidget {
-  static const route = '/auth/login';
+class RegisterPage extends StatefulWidget {
+  static const route = '/auth/register';
 
-  const LoginPage({super.key});
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Вход')),
+      appBar: AppBar(title: const Text('Регистрация')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         children: [
@@ -50,15 +52,20 @@ class _LoginPageState extends State<LoginPage> {
           ElevatedButton(
             onPressed: () async {
               try {
+                setState(() {
+                  _isLoading = true;
+                });
                 final email = _emailController.text.trim();
                 final password = _passwordController.text.trim();
-                await supabase.auth.signInWithPassword(
+                await supabase.auth.signUp(
                   email: email,
                   password: password,
+                  emailRedirectTo:
+                      'passwd://callback${MFAEnrollPage.route}', // redirect the user to setup MFA page after email confirmation
                 );
                 if (mounted) {
-                  context.go(MFAVerifyPage.route);
-                  print('[DEBUG] - user from login_page: ${supabase.auth.currentUser!.id}');
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Успешно зарегистрировано')));
                 }
               } on AuthException catch (error) {
                 ScaffoldMessenger.of(context)
@@ -67,14 +74,21 @@ class _LoginPageState extends State<LoginPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Непредвиденная ошибка')));
               }
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
             },
-            child: const Text('Войти'),
+            child: _isLoading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Center(
+                        child: CircularProgressIndicator(color: Colors.white)),
+                  )
+                : const Text('Зарегистрироваться'),
           ),
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: () => context.push(RegisterPage.route),
-            child: const Text('Зарегистрироваться'),
-          )
         ],
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
-import 'package:passwd/pages/auth/signup.dart';
+import 'package:passwd/pages/auth/signup_page.dart';
 
 /// A page that lists the currently signed in user's MFA methods.
 ///

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:passwd/passwordpage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:passwd/pages/auth/login_page.dart';
-import 'package:passwd/pages/auth/signup.dart';
+import 'package:passwd/pages/auth/signup_page.dart';
 import 'package:passwd/pages/list_mfa_page.dart';
 import 'package:passwd/pages/mfa/verify_page.dart';
 import 'package:passwd/pages/mfa/enroll_page.dart';
@@ -73,7 +72,7 @@ final _router = GoRouter(
     final session = supabase.auth.currentSession;
     // A user without a session should be redirected to the register page
     if (session == null) {
-      return RegisterPage.route;
+      return LoginPage.route;
     }
 
     final assuranceLevelData =
