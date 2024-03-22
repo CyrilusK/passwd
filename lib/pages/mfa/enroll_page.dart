@@ -31,7 +31,7 @@ class _MFAEnrollPageState extends State<MFAEnrollPage> {
             },
             child: Text(
               'Выйти',
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              style: TextStyle(color: Colors.black),
             ),
           ),
         ],

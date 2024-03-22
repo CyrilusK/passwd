@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'dbhelper.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
 import 'package:passwd/pages/auth/signup.dart';
 import 'package:passwd/pages/list_mfa_page.dart';
+import 'supabasehelper.dart';
 
 class PasswordPage extends StatefulWidget {
   static const route = '/';
@@ -16,11 +18,11 @@ class PasswordPage extends StatefulWidget {
 
 class _PasswordPageState extends State<PasswordPage> {
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
-  final dbhelper = Databasehelper.instance;
+  final sphelper = SupabaseHelper.instance;
   String? type;
-  String? user;
+  String? login;
   String? pass;
-  var allrows = [];
+  List<Map<String, dynamic>> allrows = [];
 
   TextStyle titlestyle = TextStyle(
     fontSize: 20.0,
@@ -42,19 +44,19 @@ class _PasswordPageState extends State<PasswordPage> {
 
   void insertdata() async {
     Navigator.pop(context);
-    Map<String, dynamic> row = {
-      Databasehelper.columnType: type,
-      Databasehelper.columnUser: user,
-      Databasehelper.columnPass: pass,
-    };
-    final id = await dbhelper.insert(row);
-    print(id);
+    final id = await sphelper.addUserAccount(type!, login!, pass!);
     setState(() {});
   }
 
   Future<void> queryall() async {
-    allrows = await dbhelper.queryall();
+    try {
+      allrows = await sphelper.getUserAccounts();
+      print('Получены данные из базы данных: $allrows');
+    } catch (error) {
+      print('Ошибка при получении данных из базы данных: $error');
+    }
   }
+
 
   void addpassword() {
     showDialog(
@@ -102,7 +104,7 @@ class _PasswordPageState extends State<PasswordPage> {
                       style: titlestyle,
                       validator: validateempty,
                       onChanged: (_val) {
-                        user = _val;
+                        login = _val;
                       },
                     ),
                   ),
@@ -146,27 +148,28 @@ class _PasswordPageState extends State<PasswordPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          "Сохраненные данные",
-          style: titlestyle
-        ),
-          actions: [
+        title: Text("Сохраненные данные", style: titlestyle),
+        actions: [
           PopupMenuButton(
-          itemBuilder: (context) {
-          return [
-            PopupMenuItem(child: const Text('Отменить МФА'), onTap: () {
-              context.push(ListMFAPage.route);
-              },
-            ),
-            PopupMenuItem(child: const Text('Выйти'), onTap: () {
-              supabase.auth.signOut();
-              context.go(RegisterPage.route);
-              },
-            ),
-          ];
-          },
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  child: const Text('Отменить МФА'),
+                  onTap: () {
+                    context.push(ListMFAPage.route);
+                  },
+                ),
+                PopupMenuItem(
+                  child: const Text('Выйти'),
+                  onTap: () {
+                    supabase.auth.signOut();
+                    context.go(RegisterPage.route);
+                  },
+                ),
+              ];
+            },
           )
-          ],
+        ],
         backgroundColor: Colors.indigo,
       ),
       floatingActionButton: FloatingActionButton(
@@ -179,7 +182,7 @@ class _PasswordPageState extends State<PasswordPage> {
       body: FutureBuilder(
         builder: (context, AsyncSnapshot<void> snapshot) {
           if (snapshot.hasData != null) {
-            if (allrows.length == 0) {
+            if (allrows.isEmpty) {
               return Center(
                 child: Text(
                   "Отсутствуют данные",
@@ -205,14 +208,12 @@ class _PasswordPageState extends State<PasswordPage> {
                         ),
                         child: Column(
                           children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: Text(
-                                    allrows[index]['type'],
-                                    textAlign: TextAlign.center,
-                                    style: titlestyle
-                                  ),
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: Text(allrows[index]['service_name'],
+                                  textAlign: TextAlign.center,
+                                  style: titlestyle),
+                            ),
                             ListTile(
                               leading: Icon(
                                 Icons.facebook,
@@ -220,11 +221,11 @@ class _PasswordPageState extends State<PasswordPage> {
                                 color: Colors.white,
                               ),
                               title: Text(
-                                allrows[index]['user'],
+                                allrows[index]['login'],
                                 style: titlestyle,
                               ),
                               subtitle: Text(
-                                allrows[index]['pass'],
+                                allrows[index]['password'],
                                 style: subtitlestyle,
                               ),
                             ),

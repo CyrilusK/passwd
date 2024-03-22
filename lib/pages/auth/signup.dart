@@ -61,11 +61,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   email: email,
                   password: password,
                   emailRedirectTo:
-                  'passwd://callback${MFAEnrollPage.route}', // redirect the user to setup MFA page after email confirmation
+                      'passwd://callback${MFAEnrollPage.route}', // redirect the user to setup MFA page after email confirmation
                 );
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Check your inbox.')));
+                      const SnackBar(content: Text('Успешно зарегистрировано')));
                 }
               } on AuthException catch (error) {
                 ScaffoldMessenger.of(context)
@@ -82,17 +82,17 @@ class _RegisterPageState extends State<RegisterPage> {
             },
             child: _isLoading
                 ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: Center(
-                  child: CircularProgressIndicator(color: Colors.white)),
-            )
+                    height: 24,
+                    width: 24,
+                    child: Center(
+                        child: CircularProgressIndicator(color: Colors.white)),
+                  )
                 : const Text('Зарегистрироваться'),
           ),
           const SizedBox(height: 16),
           TextButton(
             onPressed: () => context.push(LoginPage.route),
-            child: const Text('Войти'),
+            child: const Text('У меня есть аккаунт'),
           )
         ],
       ),
