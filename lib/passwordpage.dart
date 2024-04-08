@@ -6,7 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
 import 'package:passwd/pages/list_mfa_page.dart';
 import 'supabasehelper.dart';
-import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:passwd/generatorPass.dart';
 
 class PasswordPage extends StatefulWidget {
   static const route = '/';
@@ -18,6 +19,7 @@ class PasswordPage extends StatefulWidget {
 
 class _PasswordPageState extends State<PasswordPage> {
   bool obscureText = true;
+  Timer? _timer;
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
   final sphelper = SupabaseHelper.instance;
   String? type;
@@ -148,7 +150,7 @@ class _PasswordPageState extends State<PasswordPage> {
     var editedData = data;
     var service = editedData['service_name'];
     var nick = editedData['login'];
-    var password = editedData['login'];
+    var password = editedData['password'];
     showDialog(
         context: context,
         builder: (context) => SimpleDialog(
@@ -270,10 +272,12 @@ class _PasswordPageState extends State<PasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: deeppurple,
         centerTitle: true,
         title: Text("Сохраненные данные", style: titlestyle),
         actions: [
           PopupMenuButton(
+            iconColor: Colors.white,
             itemBuilder: (context) {
               return [
                 PopupMenuItem(
@@ -294,7 +298,6 @@ class _PasswordPageState extends State<PasswordPage> {
             },
           )
         ],
-        backgroundColor: Colors.indigo,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addPassword,
@@ -390,7 +393,7 @@ class _PasswordPageState extends State<PasswordPage> {
                               ),
                               ListTile(
                                 leading: Icon(
-                                  Icons.facebook,
+                                  Icons.account_circle,
                                   size: 40.0,
                                   color: Colors.white,
                                 ),
@@ -401,36 +404,68 @@ class _PasswordPageState extends State<PasswordPage> {
                                 subtitle: Row(
                                   children: [
                                     Expanded(
-                                        child: TextFormField(
-                                          initialValue: allrows[index]['password'],
-                                          style: titlestyle,
-                                          obscureText: obscureText,
-                                          decoration: InputDecoration(
-                                              contentPadding: EdgeInsets.zero,
-                                              border: InputBorder.none, // Установка пустой границы
-                                              suffixIcon: IconButton(
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      obscureText = !obscureText;
-                                                    });
-                                                  },
-                                                  icon: Icon(obscureText
-                                                      ? Icons.visibility_off
-                                                      : Icons.visibility),
-                                                  color: Colors.white)
-                                          ),
+                                      child: TextFormField(
+                                        enabled: false,
+                                        initialValue: allrows[index]
+                                            ['password'],
+                                        style: titlestyle,
+                                        obscureText: obscureText,
+                                        decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.zero,
+                                          border: InputBorder
+                                              .none, // Установка пустой границы
                                         ),
+                                      ),
                                     ),
                                     IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            obscureText = !obscureText;
+                                          });
+                                        },
+                                        icon: Icon(obscureText
+                                            ? Icons.visibility_off
+                                            : Icons.visibility),
+                                        color: Colors.white),
+                                    IconButton(
                                       onPressed: () async {
-                                        await Clipboard.setData(ClipboardData(text: allrows[index]['password']));
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                          content: Text("Пароль скопирован в буфер обмена"),
+                                        await Clipboard.setData(ClipboardData(
+                                            text: allrows[index]['password']));
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content: Text(
+                                              "Пароль скопирован в буфер обмена"),
                                         ));
+                                        _timer =
+                                            Timer(Duration(seconds: 20), () {
+                                          Clipboard.setData(
+                                              ClipboardData(text: ''));
+                                          _timer?.cancel();
+                                        });
                                       },
                                       icon: Icon(Icons.content_copy),
                                       color: Colors.white,
                                     ),
+                                    IconButton(
+                                        onPressed: () {
+                                          Map<String, dynamic> data =
+                                              allrows[index];
+                                          String newPass = generatePassword(
+                                              data['service_name'],
+                                              data['password']);
+                                          sphelper.updateUserAccount(
+                                              data['id'],
+                                              data['service_name'],
+                                              data['login'],
+                                              newPass);
+                                          allrows[index]['password'] = newPass;
+                                          setState(() {
+                                            print(
+                                                '[DEBUG] - Пароль успешно сгенерирован');
+                                          });
+                                        },
+                                        icon: Icon(Icons.refresh),
+                                        color: Colors.white),
                                   ],
                                 ),
                               ),
