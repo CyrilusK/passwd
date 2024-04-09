@@ -8,6 +8,7 @@ import 'package:passwd/pages/list_mfa_page.dart';
 import 'supabasehelper.dart';
 import 'dart:async';
 import 'package:passwd/generatorPass.dart';
+import 'package:passwd/editPasswordScreen.dart';
 
 class PasswordPage extends StatefulWidget {
   static const route = '/';
@@ -47,6 +48,7 @@ class _PasswordPageState extends State<PasswordPage> {
 
   void insertdata() async {
     Navigator.pop(context);
+    //final encrypedPass = Kuznechik().encrypt(utf8.encode(pass!), login!);
     final id = await sphelper.addUserAccount(type!, login!, pass!);
     setState(() {});
   }
@@ -147,126 +149,27 @@ class _PasswordPageState extends State<PasswordPage> {
   }
 
   void editPassword(Map<String, dynamic> data, int index) async {
-    var editedData = data;
-    var service = editedData['service_name'];
-    var nick = editedData['login'];
-    var password = editedData['password'];
-    showDialog(
-        context: context,
-        builder: (context) => SimpleDialog(
-              backgroundColor: Colors.indigo,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-              titlePadding: EdgeInsets.all(0),
-              title: Align(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Редактировать данные",
-                      style: subtitlestyle,
-                      textAlign: TextAlign.center,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 15, left: 15),
-                      child: IconButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            setState(() {});
-                          },
-                          icon: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 18,
-                          )),
-                    )
-                  ],
-                ),
-              ),
-              children: <Widget>[
-                Form(
-                  key: formstate,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      TextFormField(
-                        initialValue: data['service_name'],
-                        decoration: InputDecoration(
-                          labelText: "Веб-сайт",
-                          labelStyle: subtitlestyle,
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                        ),
-                        style: titlestyle,
-                        validator: validateempty,
-                        onChanged: (_val) {
-                          service = _val;
-                        },
-                      ),
-                      TextFormField(
-                        initialValue: data['login'],
-                        decoration: InputDecoration(
-                          labelText: "Логин/е-мейл/номер",
-                          labelStyle: subtitlestyle,
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                        ),
-                        style: titlestyle,
-                        validator: validateempty,
-                        onChanged: (_val) {
-                          nick = _val;
-                        },
-                      ),
-                      TextFormField(
-                        obscureText: true,
-                        initialValue: data['password'],
-                        decoration: InputDecoration(
-                          labelText: "Пароль",
-                          labelStyle: subtitlestyle,
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)),
-                        ),
-                        style: titlestyle,
-                        validator: validateempty,
-                        onChanged: (_val) {
-                          password = _val;
-                        },
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15.0),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (formstate.currentState!.validate()) {
-                              print("[DEBUG] - Ready To Edit Data");
-                              sphelper.updateUserAccount(
-                                  data['id'], service, nick, password);
-                              setState(() {
-                                allrows[index]['service_name'] = service;
-                                allrows[index]['login'] = nick;
-                                allrows[index]['password'] = password;
-                              });
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text("Редактировать", style: titlestyle),
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPasswordScreen(data: data),
+      ),
+    ).then((value) {
+      // Выполняется после закрытия экрана редактирования
+      if (value != null && value is Map<String, dynamic>) {
+        // Обновляем данные после редактирования
+        setState(() {
+          allrows[index] = value;
+          sphelper.updateUserAccount(
+              value['id'],
+              value['service_name'],
+              value['login'],
+              value['password']);
+        });
+      }
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -373,6 +276,8 @@ class _PasswordPageState extends State<PasswordPage> {
                             print('[DEBUG] - ${allrows.elementAt(index)}');
                             final tipe = allrows.elementAt(index);
                             editPassword(allrows.elementAt(index), index);
+                            setState(() {
+                            });
                           }
                         },
                         child: Container(
@@ -446,26 +351,6 @@ class _PasswordPageState extends State<PasswordPage> {
                                       icon: Icon(Icons.content_copy),
                                       color: Colors.white,
                                     ),
-                                    IconButton(
-                                        onPressed: () {
-                                          Map<String, dynamic> data =
-                                              allrows[index];
-                                          String newPass = generatePassword(
-                                              data['service_name'],
-                                              data['password']);
-                                          sphelper.updateUserAccount(
-                                              data['id'],
-                                              data['service_name'],
-                                              data['login'],
-                                              newPass);
-                                          allrows[index]['password'] = newPass;
-                                          setState(() {
-                                            print(
-                                                '[DEBUG] - Пароль успешно сгенерирован');
-                                          });
-                                        },
-                                        icon: Icon(Icons.refresh),
-                                        color: Colors.white),
                                   ],
                                 ),
                               ),
