@@ -19,6 +19,7 @@ class PasswordPage extends StatefulWidget {
 }
 
 class _PasswordPageState extends State<PasswordPage> {
+  static const platform = MethodChannel('samples.flutter.dev/battery');
   bool obscureText = true;
   Timer? _timer;
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
@@ -46,9 +47,29 @@ class _PasswordPageState extends State<PasswordPage> {
     }
   }
 
+  Future<String> encrypt(String text, String key) async {
+    try {
+      final encryptedData = await platform.invokeMethod('encrypt', {'text': text, 'key': key});
+      return encryptedData;
+    } on PlatformException catch (e) {
+      print("[DEBUG] - Failed to encrypt: '${e.message}'");
+      return '';
+    }
+  }
+
+  Future<String> decrypt(String data, String key) async {
+    try {
+      final decryptedData = await platform.invokeMethod('decrypt', {'data': data, 'key': key});
+      return decryptedData;
+    } on PlatformException catch (e) {
+      print("[DEBUG] - Failed to decrypt: '${e.message}'");
+      return '';
+    }
+  }
+
   void insertdata() async {
     Navigator.pop(context);
-    //final encrypedPass = Kuznechik().encrypt(utf8.encode(pass!), login!);
+    //final encrypedPass = await encrypt(pass!, login!);
     final id = await sphelper.addUserAccount(type!, login!, pass!);
     setState(() {});
   }
@@ -157,9 +178,11 @@ class _PasswordPageState extends State<PasswordPage> {
     ).then((value) {
       // Выполняется после закрытия экрана редактирования
       if (value != null && value is Map<String, dynamic>) {
+        List<Map<String, dynamic>> updatedList = List.from(allrows);
+        updatedList[index] = value;
         // Обновляем данные после редактирования
         setState(() {
-          allrows[index] = value;
+          allrows = updatedList;
           sphelper.updateUserAccount(
               value['id'],
               value['service_name'],
@@ -258,6 +281,8 @@ class _PasswordPageState extends State<PasswordPage> {
                           if (direction == DismissDirection.endToStart) {
                             // Обработка удаления
                             final deletedItem = allrows.removeAt(index);
+                            setState(() {
+                            });
                             if (allrows.isEmpty) {
                               setState(() {
                                 Center(

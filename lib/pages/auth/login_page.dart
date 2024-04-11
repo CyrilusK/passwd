@@ -4,6 +4,7 @@ import 'package:passwd/main.dart';
 import 'package:passwd/pages/auth/signup_page.dart';
 import 'package:passwd/pages/mfa/verify_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:passwd/encryption.dart';
 
 class LoginPage extends StatefulWidget {
   static const route = '/auth/login';
@@ -57,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                   password: password,
                 );
                 if (mounted) {
+                  final encryption = Encryption(password);
                   context.go(MFAVerifyPage.route);
                   print('[DEBUG] - user from login_page: ${supabase.auth.currentUser!.id}');
                 }

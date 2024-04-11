@@ -1,17 +1,19 @@
+import 'package:passwd/constants.dart';
+import 'package:passwd/encryption.dart';
 import 'package:passwd/main.dart';
 import 'package:supabase/supabase.dart';
+import 'package:encrypt/encrypt.dart';
 
-class SupabaseHelper {
+class SupabaseHelper extends Encryption {
   static final SupabaseHelper instance = SupabaseHelper._privateConstructor();
   static SupabaseClient? _client;
-
   SupabaseHelper._privateConstructor();
 
   Future<void> addUserAccount(String serviceName, String login, String password) async {
     final response = await supabase
         .from('user_accounts')
         .insert([
-      {'user_id': supabase.auth.currentUser!.id, 'service_name': serviceName, 'login': login, 'password': password}
+      {Constants.idUser: supabase.auth.currentUser!.id, Constants.serviceName: encrypt(serviceName), Constants.login: encrypt(login), Constants.pass: encrypt(password)}
     ]);
 
     if (response != null) {
@@ -23,6 +25,12 @@ class SupabaseHelper {
 
   Future<List<Map<String, dynamic>>> getUserAccounts() async {
     final response = await supabase.from('user_accounts').select().eq('user_id', supabase.auth.currentUser!.id);
+    for (final account in response) {
+      account[Constants.serviceName] = decrypt(account[Constants.serviceName]);
+      account[Constants.login] = decrypt(account[Constants.login]);
+      account[Constants.pass] = decrypt(account[Constants.pass]);
+      print(account);
+    }
     print('[DEBUG] - user: ${supabase.auth.currentUser!.id}');
     return response;
   }
@@ -30,7 +38,7 @@ class SupabaseHelper {
   Future<void> updateUserAccount(int id, String serviceName, String login, String password) async {
     final response = await supabase
         .from('user_accounts')
-        .update({'service_name': serviceName, 'login': login, 'password': password})
+        .update({Constants.idUser: supabase.auth.currentUser!.id, Constants.serviceName: encrypt(serviceName), Constants.login: encrypt(login), Constants.pass: encrypt(password)})
         .eq('id', id);
     if (response != null) {
       print('[DEBUG] - Ошибка при обновлении данных: ${response.error!.message}');
