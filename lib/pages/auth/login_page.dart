@@ -4,10 +4,12 @@ import 'package:passwd/main.dart';
 import 'package:passwd/pages/auth/signup_page.dart';
 import 'package:passwd/pages/mfa/verify_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:passwd/encryption.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class LoginPage extends StatefulWidget {
   static const route = '/auth/login';
+  static var sharedData = '';
 
   const LoginPage({super.key});
 
@@ -58,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
                   password: password,
                 );
                 if (mounted) {
-                  final encryption = Encryption(password);
+                  LoginPage.sharedData = md5.convert(utf8.encode(_passwordController.text)).toString();
                   context.go(MFAVerifyPage.route);
                   print('[DEBUG] - user from login_page: ${supabase.auth.currentUser!.id}');
                 }

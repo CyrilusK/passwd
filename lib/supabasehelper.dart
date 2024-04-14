@@ -1,10 +1,11 @@
 import 'package:passwd/constants.dart';
 import 'package:passwd/encryption.dart';
+import 'package:passwd/kuznechik.dart';
 import 'package:passwd/main.dart';
 import 'package:supabase/supabase.dart';
 import 'package:encrypt/encrypt.dart';
 
-class SupabaseHelper extends Encryption {
+class SupabaseHelper extends Kuznechik {
   static final SupabaseHelper instance = SupabaseHelper._privateConstructor();
   static SupabaseClient? _client;
   SupabaseHelper._privateConstructor();

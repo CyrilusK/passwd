@@ -18,8 +18,7 @@ class PasswordPage extends StatefulWidget {
   _PasswordPageState createState() => _PasswordPageState();
 }
 
-class _PasswordPageState extends State<PasswordPage> {
-  static const platform = MethodChannel('samples.flutter.dev/battery');
+class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver {
   bool obscureText = true;
   Timer? _timer;
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
@@ -28,6 +27,26 @@ class _PasswordPageState extends State<PasswordPage> {
   String? login;
   String? pass;
   List<Map<String, dynamic>> allrows = [];
+
+  @override void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      supabase.auth.signOut();
+      context.go(LoginPage.route);
+    }
+  }
 
   TextStyle titlestyle = TextStyle(
     fontSize: 20.0,
@@ -47,29 +66,8 @@ class _PasswordPageState extends State<PasswordPage> {
     }
   }
 
-  Future<String> encrypt(String text, String key) async {
-    try {
-      final encryptedData = await platform.invokeMethod('encrypt', {'text': text, 'key': key});
-      return encryptedData;
-    } on PlatformException catch (e) {
-      print("[DEBUG] - Failed to encrypt: '${e.message}'");
-      return '';
-    }
-  }
-
-  Future<String> decrypt(String data, String key) async {
-    try {
-      final decryptedData = await platform.invokeMethod('decrypt', {'data': data, 'key': key});
-      return decryptedData;
-    } on PlatformException catch (e) {
-      print("[DEBUG] - Failed to decrypt: '${e.message}'");
-      return '';
-    }
-  }
-
   void insertdata() async {
     Navigator.pop(context);
-    //final encrypedPass = await encrypt(pass!, login!);
     final id = await sphelper.addUserAccount(type!, login!, pass!);
     setState(() {});
   }
