@@ -8,12 +8,18 @@ import 'package:passwd/pages/list_mfa_page.dart';
 import 'package:passwd/pages/mfa/verify_page.dart';
 import 'package:passwd/pages/mfa/enroll_page.dart';
 
-const supabaseUrl = '';
-const supabaseKey = '';
+const supabaseUrl = 'https://jbpgjnxurqhijasmvige.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpicGdqbnh1cnFoaWphc212aWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTA5NDQwMDcsImV4cCI6MjAyNjUyMDAwN30.x8mnaNQ9k6UuIBUERNsTHoT9q0v2KZ6GfCJ-Gp-qGmc';
 
 Future<void> main() async {
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
   runApp(MyApp());
+}
+
+void deleteUser() async {
+  await supabase.auth.admin.deleteUser(
+    supabase.auth.currentUser!.id
+  );
 }
 
 final supabase = Supabase.instance.client;

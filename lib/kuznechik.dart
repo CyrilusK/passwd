@@ -163,6 +163,13 @@ void main(){
 }*/
   List<String> getKeys() {
     String key = LoginPage.sharedData;
+    if (!key.isEmpty) {
+      String key = LoginPage.sharedData;
+    }
+    else {
+      print("[DEBUG] - Invalid key for decryption");
+      return [];
+    }
     key = transformKey(key);
     List<String> C = []; // константы
     List<List<String>> F = []; // ячейки Фейстеля
@@ -199,6 +206,11 @@ void main(){
 
   String encrypt(String text) {
     List<String> K = getKeys();
+
+    if (K.isEmpty) {
+      return '';
+    }
+
     text = utf8ToHex(text);
 
     int count = 32 - text.length % 32;
@@ -224,6 +236,9 @@ void main(){
 
   String decrypt(String text) {
     List<String> K = getKeys();
+    if (K.isEmpty) {
+      return '';
+    }
     List<String> textArray = [];
     for (int i = 0; i < (text.length ~/ 32); i++) {
       textArray.add(text.substring(i * 32, i * 32 + 32));

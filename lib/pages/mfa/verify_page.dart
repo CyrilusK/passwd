@@ -27,7 +27,7 @@ class _MFAVerifyPageState extends State<MFAVerifyPage> {
             },
             child: Text(
               'Выйти',
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                style: TextStyle(color: Colors.black),
             ),
           ),
         ],

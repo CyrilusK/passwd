@@ -28,6 +28,7 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
   String? pass;
   List<Map<String, dynamic>> allrows = [];
 
+
   @override void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
@@ -218,6 +219,14 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
                     context.go(LoginPage.route);
                   },
                 ),
+                PopupMenuItem(
+                  child: const Text('Удалить аккаунт'),
+                  onTap: () {
+                    deleteUser();
+                    allrows = [];
+                    context.go(LoginPage.route);
+                  },
+                )
               ];
             },
           )
