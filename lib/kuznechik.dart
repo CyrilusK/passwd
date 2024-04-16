@@ -208,7 +208,7 @@ void main(){
     List<String> K = getKeys();
 
     if (K.isEmpty) {
-      return '';
+      throw StateError('Invalid key');
     }
 
     text = utf8ToHex(text);
@@ -237,7 +237,7 @@ void main(){
   String decrypt(String text) {
     List<String> K = getKeys();
     if (K.isEmpty) {
-      return '';
+      throw StateError('Invalid key');
     }
     List<String> textArray = [];
     for (int i = 0; i < (text.length ~/ 32); i++) {

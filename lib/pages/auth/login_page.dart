@@ -65,8 +65,14 @@ class _LoginPageState extends State<LoginPage> {
                   print('[DEBUG] - user from login_page: ${supabase.auth.currentUser!.id}');
                 }
               } on AuthException catch (error) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(error.message)));
+                if (error.message == "Invalid login credentials") {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text("Некорректные данные")));
+                }
+                else {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(error.message)));
+                }
               } catch (error) {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Непредвиденная ошибка')));
@@ -74,11 +80,14 @@ class _LoginPageState extends State<LoginPage> {
             },
             child: const Text('Войти'),
           ),
-          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () => context.push(RegisterPage.route),
+            child: const Text('Восстановить доступ'),
+          ),
           TextButton(
             onPressed: () => context.push(RegisterPage.route),
             child: const Text('Зарегистрироваться'),
-          )
+          ),
         ],
       ),
     );

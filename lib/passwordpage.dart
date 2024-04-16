@@ -288,6 +288,7 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
                           if (direction == DismissDirection.endToStart) {
                             // Обработка удаления
                             final deletedItem = allrows.removeAt(index);
+                            sphelper.deleteUserAccount(deletedItem['id']);
                             setState(() {
                             });
                             if (allrows.isEmpty) {
@@ -301,8 +302,6 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
                                 );
                               });
                             }
-                            // Вызов метода для удаления элемента из базы данных
-                            sphelper.deleteUserAccount(deletedItem['id']);
                           } else if (direction == DismissDirection.startToEnd) {
                             // Обработка редактирования
                             print('[DEBUG] - ${allrows.elementAt(index)}');

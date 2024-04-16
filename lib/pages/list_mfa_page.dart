@@ -34,7 +34,7 @@ class ListMFAPage extends StatelessWidget {
               final factor = factors[index];
               return ListTile(
                 title: Text(factor.friendlyName ?? factor.factorType.name),
-                subtitle: Text(factor.status.name),
+                subtitle: Text(factor.status.name == "verified" ? "верифицирован": "неверифицирован"),
                 trailing: IconButton(
                   onPressed: () {
                     showDialog(
