@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:passwd/generatorPass.dart';
 import 'colors.dart';
+import 'package:http/http.dart' as http;
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 
 class EditPasswordScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -42,6 +45,23 @@ class _EditPasswordScreenState extends State<EditPasswordScreen> {
       return null;
     }
   }
+
+  Future<bool> isPasswordCompromised(String password) async {
+    if (password.isEmpty) throw Exception('You must provide a password');
+
+    final digest = sha1.convert(utf8.encode(password)).toString().toUpperCase();
+    final firstFive = digest.substring(0, 5);
+
+    final response = await http.get(Uri.parse('https://api.pwnedpasswords.com/range/$firstFive'));
+
+    if (response.statusCode == 200) {
+      final body = response.body;
+      return body.split('\r\n').any((o) => firstFive + o.split(':')[0] == digest);
+    } else {
+      throw Exception('Failed to check password: ${response.reasonPhrase}');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,20 +177,41 @@ class _EditPasswordScreenState extends State<EditPasswordScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (formstate.currentState!.validate()) {
-                      final editedData = {
-                        'id': widget.data['id'],
-                        'service_name': _serviceController.text,
-                        'login': _loginController.text,
-                        'password': _passwordController.text,
-                      };
-                      Navigator.of(context).pop(editedData);
-                    }
-                  },
-                  child: Text('Сохранить'),
-                ),
+                child: Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_passwordController.text.isNotEmpty) {
+                          bool compromised = await isPasswordCompromised(_passwordController.text);
+                          if (compromised) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text("Пароль был найден в базе данных утечек. Пожалуйста, выберите другой пароль")));
+                          }
+                          else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text("Пароль не найден в базе данных утечек")));
+                          }
+                        }
+                      },
+                      child: Text('Проверить'),
+                    ),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (formstate.currentState!.validate()) {
+                          final editedData = {
+                            'id': widget.data['id'],
+                            'service_name': _serviceController.text,
+                            'login': _loginController.text,
+                            'password': _passwordController.text,
+                          };
+                          Navigator.of(context).pop(editedData);
+                        }
+                      },
+                      child: Text('Сохранить'),
+                    ),
+                  ],
+                )
               ),
             ],
           ),

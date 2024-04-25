@@ -7,8 +7,8 @@ import 'package:passwd/main.dart';
 import 'package:passwd/pages/list_mfa_page.dart';
 import 'supabasehelper.dart';
 import 'dart:async';
-import 'package:passwd/generatorPass.dart';
 import 'package:passwd/editPasswordScreen.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 
 class PasswordPage extends StatefulWidget {
   static const route = '/';
@@ -28,15 +28,20 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
   String? pass;
   List<Map<String, dynamic>> allrows = [];
 
+  Future<void> secureScreen() async {
+    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+  }
 
   @override void initState() {
-    super.initState();
     WidgetsBinding.instance.addObserver(this);
+    secureScreen();
+    super.initState();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
     super.dispose();
   }
 
