@@ -25,12 +25,12 @@ class SupabaseHelper extends Kuznechik {
   }
 
   Future<List<Map<String, dynamic>>> getUserAccounts() async {
-    final response = await supabase.from('user_accounts').select().eq('user_id', supabase.auth.currentUser!.id);
+    final response = await supabase.from('user_accounts').select().eq('user_id', supabase.auth.currentUser!.id).order("id");
     for (final account in response) {
       account[Constants.serviceName] = decrypt(account[Constants.serviceName]);
       account[Constants.login] = decrypt(account[Constants.login]);
       account[Constants.pass] = decrypt(account[Constants.pass]);
-      print(account);
+      //print(account);
     }
     print('[DEBUG] - user: ${supabase.auth.currentUser!.id}');
     return response;

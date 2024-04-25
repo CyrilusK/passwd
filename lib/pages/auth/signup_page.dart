@@ -68,6 +68,22 @@ class _RegisterPageState extends State<RegisterPage> {
                   context.go(MFAEnrollPage.route);
                 }
               } on AuthException catch (error) {
+                if (error.message == "Password should be at least 12 characters. Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789.") {
+                  String str = "Пароль должен состоять минимум из 12 символов и включать хотя бы по одному символу из следующих наборов: abcdefghijkimnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789.";
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(str)));
+                }
+                else if (error.message == "User already registered") {
+                  String str = "Пользователь уже зарегистрован";
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(str)));
+                }
+                else if (error.message == "Anonymous sign-ins are disabled") {
+                  String str = "Пустые поля";
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(str)));
+                }
+                print("[DEBUG] - ${error.message}");
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(error.message)));
               } catch (error) {

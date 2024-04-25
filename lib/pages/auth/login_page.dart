@@ -82,10 +82,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextButton(
             onPressed: () => context.push(RegisterPage.route),
-            child: const Text('Восстановить доступ'),
-          ),
-          TextButton(
-            onPressed: () => context.push(RegisterPage.route),
             child: const Text('Зарегистрироваться'),
           ),
         ],

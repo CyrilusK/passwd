@@ -76,7 +76,7 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
   Future<void> queryall() async {
     try {
       allrows = await sphelper.getUserAccounts();
-      print('[DEBUG] - Получены данные из базы данных: $allrows');
+      print('[DEBUG] - Получены данные из базы данных:');
     } catch (error) {
       print('[DEBUG] - Ошибка при получении данных из базы данных: $error');
     }
@@ -201,6 +201,15 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
         centerTitle: true,
         title: Text("Сохраненные данные", style: titlestyle),
         actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                obscureText = !obscureText;
+              });
+            },
+            icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+            color: Colors.white,
+          ),
           PopupMenuButton(
             iconColor: Colors.white,
             itemBuilder: (context) {
@@ -219,14 +228,6 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
                     context.go(LoginPage.route);
                   },
                 ),
-                PopupMenuItem(
-                  child: const Text('Удалить аккаунт'),
-                  onTap: () {
-                    deleteUser();
-                    allrows = [];
-                    context.go(LoginPage.route);
-                  },
-                )
               ];
             },
           )
@@ -353,16 +354,6 @@ class _PasswordPageState extends State<PasswordPage> with WidgetsBindingObserver
                                         ),
                                       ),
                                     ),
-                                    IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            obscureText = !obscureText;
-                                          });
-                                        },
-                                        icon: Icon(obscureText
-                                            ? Icons.visibility_off
-                                            : Icons.visibility),
-                                        color: Colors.white),
                                     IconButton(
                                       onPressed: () async {
                                         await Clipboard.setData(ClipboardData(
