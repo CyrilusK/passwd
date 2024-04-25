@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:passwd/pages/auth/login_page.dart';
+import 'package:passwd/pages/auth/signup_page.dart';
 
 class Kuznechik {
-  static final key = LoginPage.sharedData;
 
   String xorFunc(String input1AsString, String input2AsString, {int inCode = 16}){
     BigInt input1AsInteger = BigInt.parse(input1AsString, radix: inCode);
@@ -162,11 +162,8 @@ void main(){
   print(hexToUtf8("3737363635353434333332323131303046464545444443434242414139393838"));//7766554433221100FFEEDDCCBBAA9988
 }*/
   List<String> getKeys() {
-    String key = LoginPage.sharedData;
-    if (!key.isEmpty) {
-      String key = LoginPage.sharedData;
-    }
-    else {
+    String key = LoginPage.sharedData.isNotEmpty ? LoginPage.sharedData : RegisterPage.sharedData;
+    if (key.isEmpty) {
       print("[DEBUG] - Invalid key for decryption");
       return [];
     }

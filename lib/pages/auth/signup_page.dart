@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:passwd/main.dart';
 import 'package:passwd/pages/mfa/enroll_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class RegisterPage extends StatefulWidget {
   static const route = '/auth/register';
+  static var sharedData = '';
 
   const RegisterPage({super.key});
 
@@ -63,6 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   //    'passwd://callback${MFAEnrollPage.route}', // redirect the user to setup MFA page after email confirmation
                 );
                 if (mounted) {
+                  RegisterPage.sharedData = md5.convert(utf8.encode(_passwordController.text)).toString();
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Успешно зарегистрировано')));
                   context.go(MFAEnrollPage.route);
