@@ -77,6 +77,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text(str)));
                 }
+                if (error.message == "Password should be at least 12 characters.") {
+                  String str = "Пароль должен состоять минимум из 12 символов.";
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(str)));
+                }
                 else if (error.message == "User already registered") {
                   String str = "Пользователь уже зарегистрован";
                   ScaffoldMessenger.of(context)
@@ -88,8 +93,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       .showSnackBar(SnackBar(content: Text(str)));
                 }
                 print("[DEBUG] - ${error.message}");
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(error.message)));
               } catch (error) {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Непредвиденная ошибка')));

@@ -25,6 +25,7 @@ class SupabaseHelper extends Kuznechik {
   }
 
   Future<List<Map<String, dynamic>>> getUserAccounts() async {
+    await Future.delayed(Duration(seconds: 1));
     final response = await supabase.from('user_accounts').select().eq('user_id', supabase.auth.currentUser!.id).order("id");
     for (final account in response) {
       account[Constants.serviceName] = decrypt(account[Constants.serviceName]);
